@@ -1,0 +1,14 @@
+table#dataTable tbody .dropdown-menu.show{
+    transform: translate3d(-120px, 38px, 0px) !important;
+    will-change: transform;
+    left: -75%;
+    right: 0px !important;
+}
+
+.bootstrap-select.btn-group > .dropdown-toggle{
+    padding: 8px 10px !important;
+}
+
+[class*=sidebar-dark-] {
+    background-color: #083a6c !important; /* Force override */
+}

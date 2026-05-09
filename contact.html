@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - NIRMA PRAKASHAN</title>
+  <link rel="icon" type="image/png" href="images/logo.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-static@0.469.0/font/lucide.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="min-h-screen bg-background flex flex-col">
+    
+    <!-- Header -->
+    <header class="header">
+      <div class="header-container">
+        <!-- Logo -->
+        <a href="index.html" class="header-logo">
+          <img src="images/logo.png" alt="NIRMA PRAKASHAN">
+          <span>Dainik Nirman</span>
+        </a>
+
+        <!-- Navigation -->
+        <nav class="header-nav">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="index.html#books" class="nav-link">Books</a>
+          <a href="about.html" class="nav-link">About Us</a>
+          <a href="contact.html" class="nav-link active">Contact Us</a>
+        </nav>
+
+        <!-- Actions -->
+        <div class="header-actions">
+          <!-- Cart -->
+          <!-- <a href="#" class="header-icon" title="Cart">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="8" cy="21" r="1"></circle>
+              <circle cx="19" cy="21" r="1"></circle>
+              <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+            </svg>
+          </a> -->
+
+          <!-- Mobile Menu Toggle -->
+          <button class="mobile-menu-toggle" id="mobileMenuToggle">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" x2="20" y1="12" y2="12"></line>
+              <line x1="4" x2="20" y1="6" y2="6"></line>
+              <line x1="4" x2="20" y1="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div class="mobile-menu" id="mobileMenu">
+        <a href="index.html" class="mobile-nav-link">Home</a>
+        <a href="index.html#books" class="mobile-nav-link">Books</a>
+        <a href="about.html" class="mobile-nav-link">About Us</a>
+        <a href="contact.html" class="mobile-nav-link active">Contact Us</a>
+      </div>
+    </header>
+    
+
+    <!-- Contact Us Section -->
+    <section class="policy-section">
+      <div class="policy-container">
+        <h1 class="policy-title">Contact Us</h1>
+        <p class="policy-intro">Have questions? We're here to help. Reach out to us through any of the following channels.</p>
+
+        <div class="policy-content">
+          <div class="policy-card">
+            <h2>Get in Touch</h2>
+            <div class="contact-info" style="margin-top: 1.5rem;">
+              <p style="margin-bottom: 1rem;">
+                <strong>Address:</strong><br>
+                House No. 167, Laxman Nagar, Krishan Nagar,<br>
+                Lohawat Bisnawas, Phalodi, Rajasthan - 342302
+              </p>
+              <p style="margin-bottom: 1rem;"><strong>Phone No:</strong> <a href="tel:7073297038">70732 97038</a></p>
+              <p style="margin-bottom: 1rem;"><strong>Email:</strong> <a href="mailto:dainiknirman@gmail.com">dainiknirman@gmail.com</a></p>
+              <p><strong>Working Hours:</strong> Monday - Saturday, 10:00 AM - 6:00 PM</p>
+            </div>
+          </div>
+
+          <div class="policy-card">
+            <h2>Support</h2>
+            <p>For order-related queries or technical support regarding the Dainik Nirman App, please include your Order ID or Account details in your email for faster assistance.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-section" id="contact">
+      <div class="footer-container">
+        <div class="footer-brand">
+          <h3 class="footer-logo">Dainik Nirman </h3>
+          <h5>(A Unit of NIRMA PRAKASHAN)</h5>
+          <p class="footer-tagline">Your trusted source for books</p>
+        </div>
+        
+        <div class="footer-contact">
+          <h4>Contact Us</h4>
+          <p>
+            <strong>Address:</strong><br>
+            House No. 167, Laxman Nagar, Krishan Nagar,<br>
+            Lohawat Bisnawas, Phalodi, Rajasthan - 342302
+          </p>
+          <p><strong>Phone:</strong> <a href="tel:7073297038">70732 97038</a></p>
+          <p><strong>Email:</strong> <a href="mailto:dainiknirman@gmail.com">dainiknirman@gmail.com</a></p>
+        </div>
+        
+        <div class="footer-links">
+          <h4>Quick Links</h4>
+          <a href="about.html">About Us</a>
+          <a href="contact.html">Contact Us</a>
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Service</a>
+          <a href="return.html">Return & Refund Policy</a>
+          <a href="shipping.html">Shipping Policy</a>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>© 2026 NIRMA PRAKASHAN. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <!-- JavaScript for Mobile Menu -->
+    <script>
+      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+      const mobileMenu = document.getElementById('mobileMenu');
+
+      mobileMenuToggle.addEventListener('click', () => {
+        mobileMenu.classList.toggle('active');
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,250 @@
+<!-- Main Sidebar Container -->
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="{{ route('admin.dashboard') }}" class="brand-link">
+        <img src="{{ asset('public/dist/img/AdminLTELogo.png') }}" alt="Logo" class="brand-image img-circle elevation-3"
+            style="opacity: 0.8;" />
+        <span class="brand-text font-weight-light">DainikNirman</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <!-- Sidebar user panel (optional) -->
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="image">
+                <img src="{{ asset('public/dist/img/user2-160x160.jpg') }}" class="img-circle elevation-2" alt="User Image" />
+            </div>
+            <div class="info">
+                <a href="#" class="d-block">{{ $user_data->name ?? 'User' }}</a>
+            </div>
+        </div>
+        @php
+        $user = auth()->user();
+        $routeParameters = request()->route()->parameters();
+        $currentPrefix = request()->route()->action['prefix'];
+        $currentPrefix = substr($currentPrefix, strpos($currentPrefix, '/')+1, strlen($currentPrefix));
+        $masterOpenClass = '';
+        $masterActiveClass = '';
+        $masterModules = [
+            'categories',
+            'services',
+            'banners'
+        ]
+        @endphp
+
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                data-accordion="false">
+                <li class="nav-item">
+                    <a href="{{route('admin.dashboard')}}" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <p class="text">Dashboard</p>
+                    </a>
+                </li>
+
+                @if(in_array($currentPrefix, $masterModules))
+                    @php 
+                    $masterOpenClass = 'menu-open';
+                    $masterActiveClass = 'active';
+                    @endphp
+                @endif
+                {{-- <li class="nav-item {{$masterOpenClass}}">
+                    <a href="#" class="nav-link {{$masterActiveClass}}">
+                        <i class="nav-icon fas fa-cog"></i>
+                        <p>
+                            Master
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        @if(auth()->user()->hasPermissionTo('View User'))
+                        <li class="nav-item">
+                            <a href="javascript:;" class="nav-link {{$currentPrefix == 'users' ? 'active' : ''}}">
+                                <i class="nav-icon fas fa-chart-pie"></i>
+                                <p>
+                                    Users
+                                </p>
+                            </a>
+                        </li>
+                        @endif
+                    </ul>
+                </li> --}}
+
+                @if(auth()->user()->hasPermissionTo('View User'))
+                <li class="nav-item">
+                    <a href="{{route('admin.users.index')}}" class="nav-link {{$currentPrefix == 'users' ? 'active' : ''}}">
+                        <i class="nav-icon fas fa-user"></i>
+                        <p>
+                            Users
+                        </p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->hasPermissionTo('View Book'))
+                <li class="nav-item">
+                    <a href="{{route('admin.books.index')}}" class="nav-link {{$currentPrefix == 'books' ? 'active' : ''}}">
+                        <i class="nav-icon fas fa-book"></i>
+                        <p>
+                            Books
+                        </p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->hasPermissionTo('View Magazines'))
+                <li class="nav-item">
+                    <a href="{{route('admin.magazines.index')}}" class="nav-link {{$currentPrefix == 'magazines' && request()->get('type') != 'u' ? 'active' : ''}}">
+                        <i class="nav-icon fas fa-newspaper"></i>
+                        <p>
+                            Magazines
+                        </p>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{{route('admin.magazines.index')}}?type=u" class="nav-link {{$currentPrefix == 'magazines' && request()->get('type') == 'u' ? 'active' : ''}}">
+                        <i class="nav-icon fas fa-newspaper"></i>
+                        <p>
+                            User Magazines
+                        </p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->hasPermissionTo('View Cms'))
+                <li class="nav-item">
+                    <a href="{{route('admin.cms.index')}}" class="nav-link {{$currentPrefix == 'cms' ? 'active' : ''}}">
+                        <i class="nav-icon fas fa-file"></i>
+                        <p>
+                            CMS
+                        </p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->hasPermissionTo('View Contest'))
+                <li class="nav-item">
+                    <a href="{{route('admin.contests.index')}}" class="nav-link {{($currentPrefix == 'contests' || $currentPrefix == 'contest-authors') ? 'active' : ''}}">
+                        <i class="nav-icon fas fa-pencil-alt"></i>
+                        <p>
+                            Contests
+                        </p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->hasPermissionTo('View Ebook Upload Author'))
+                <li class="nav-item">
+                    <a href="{{route('admin.author-ebooks.index')}}" class="nav-link {{$currentPrefix == 'ebook' ? 'active' : ''}}">
+                        <i class="nav-icon fas fa-book"></i>
+                        <p>
+                            Ebook
+                        </p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->hasPermissionTo('View Subscription'))
+                <li class="nav-item">
+                    <a href="{{route('admin.subscriptions.index')}}" class="nav-link {{$currentPrefix == 'subscription' ? 'active' : ''}}">
+                        <i class="nav-icon fas fa-book"></i>
+                        <p>
+                            Subscription
+                        </p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->hasPermissionTo('View Royalty'))
+                <li class="nav-item">
+                    <a href="{{route('admin.royalties.index')}}" class="nav-link {{$currentPrefix == 'royalties' ? 'active' : ''}}">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <p>
+                            Royalties
+                        </p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->hasPermissionTo('View Setting'))
+                <li class="nav-item">
+                    <a href="{{route('admin.settings.index')}}" class="nav-link">
+                        <i class="nav-icon fas fa-cogs"></i>
+                        <p>
+                            Settings
+                        </p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->hasPermissionTo('View Anthology Writeup'))
+                <li class="nav-item">
+                    <a href="{{route('admin.anthologyWriteup.index')}}" class="nav-link">
+                        <i class="nav-icon fas fa-edit"></i>
+                        <p>
+                            Anthology Writeup
+                        </p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->hasPermissionTo('View Anthology'))
+                <li class="nav-item">
+                    <a href="{{route('admin.anthology.index')}}" class="nav-link">
+                        <i class="nav-icon fas fa-edit"></i>
+                        <p>
+                            Anthology
+                        </p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->hasPermissionTo('View Payment Management'))
+                <li class="nav-item">
+                    <a href="{{route('admin.paymentManagement.index')}}" class="nav-link">
+                        <i class="nav-icon fas fa-coins"></i>
+                        <p>
+                            Payments
+                        </p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->hasPermissionTo('View Orders'))
+                <li class="nav-item">
+                    <a href="{{route('admin.orders.index')}}" class="nav-link">
+                        <i class="nav-icon fas fa-shopping-cart"></i>
+                        <p>
+                            Orders
+                        </p>
+                    </a>
+                </li>
+                @endif
+
+                @if(auth()->user()->hasPermissionTo('View Notification'))
+                <li class="nav-item">
+                    <a href="{{route('admin.notifications.index')}}" class="nav-link">
+                        <i class="nav-icon fas fa-bullhorn"></i>
+                        <p>
+                            Notifications
+                        </p>
+                    </a>
+                </li>
+                @endif
+                
+                <li class="nav-item">
+                    <a href="{{route('admin.logout')}}" class="nav-link">
+                        <i class="nav-icon fas fa-sign-out-alt"></i>
+                        <p>
+                            Logout
+                        </p>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+</aside>
