@@ -8,19 +8,19 @@ use CCAvenue\Crypto;
 $merchant_id = '4442439';
 $access_code = 'AVKL92NE20AO29LKOA';
 $working_key = '5A0CF9572A5DDBDAC144DC29B3995593';
+$ccavenue_url = 'https://secure.ccavenue.com/transaction/transaction.do?command=initiateTransaction';
 
 // Basic Validation
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die("Error: Invalid request method. This page requires a POST submission from the checkout form.");
 }
 
-if (!isset($_POST['order_id']) || $_POST['order_id'] === '' || !isset($_POST['amount']) || $_POST['amount'] === '') {
-    die("Error: Missing mandatory parameters (Order ID or Amount). Received Order ID: " . ($_POST['order_id'] ?? 'NULL') . ", Amount: " . ($_POST['amount'] ?? 'NULL'));
+if (!isset($_POST['order_id']) || $_POST['order_id'] === '' || !isset($_POST['prod_id']) || $_POST['prod_id'] === '') {
+    die("Error: Missing mandatory parameters (Order ID or Product ID).");
 }
 
 // Collect data from POST
 $order_id = $_POST['order_id'] ?? '';
-$amount = $_POST['amount'] ?? '';
 $name = $_POST['billing_name'] ?? '';
 $address = $_POST['billing_address'] ?? '';
 $city = $_POST['billing_city'] ?? '';
@@ -33,6 +33,24 @@ $redirect_url = $_POST['redirect_url'] ?? '';
 $cancel_url = $_POST['cancel_url'] ?? '';
 $user_id = $_POST['user_id'] ?? '';
 $prod_id = $_POST['prod_id'] ?? '';
+$payment_option = $_POST['payment_option'] ?? '';
+
+$bookStmt = $conn->prepare("SELECT book_name, author_name, price FROM books WHERE id = ?");
+$bookStmt->bind_param("i", $prod_id);
+$bookStmt->execute();
+$bookResult = $bookStmt->get_result();
+$bookData = $bookResult->fetch_assoc();
+$bookStmt->close();
+
+if (!$bookData) {
+    die("Error: Product not found.");
+}
+
+$amount = number_format((float) $bookData['price'], 2, '.', '');
+
+if ((float) $amount <= 0) {
+    die("Error: Invalid product amount.");
+}
 
 // Build merchant data array
 $data = [
@@ -52,6 +70,10 @@ $data = [
     'billing_email' => $email,
 ];
 
+if (in_array($payment_option, ['OPTUPI'], true)) {
+    $data['payment_option'] = $payment_option;
+}
+
 $merchant_data = '';
 foreach ($data as $key => $value) {
     $merchant_data .= $key . '=' . $value . '&';
@@ -64,14 +86,6 @@ $encrypted_data = Crypto::encrypt($merchant_data, $working_key);
 // Record the order in the database (PENDING status)
 if ($conn && $order_id && $user_id && $prod_id) {
     try {
-        // Fetch book details
-        $bookStmt = $conn->prepare("SELECT book_name, author_name FROM books WHERE id = ?");
-        $bookStmt->bind_param("i", $prod_id);
-        $bookStmt->execute();
-        $bookResult = $bookStmt->get_result();
-        $bookData = $bookResult->fetch_assoc();
-        $bookStmt->close();
-
         $itemDetails = json_encode([
             'book_name' => $bookData['book_name'] ?? 'Unknown Book',
             'author_name' => $bookData['author_name'] ?? 'Unknown Author',
@@ -100,7 +114,7 @@ if ($conn && $order_id && $user_id && $prod_id) {
 ?>
 <html>
 <body onload="document.forms[0].submit()">
-    <form method="POST" action="https://test.ccavenue.com/transaction/transaction.do?command=initiateTransaction">
+    <form method="POST" action="<?= htmlspecialchars($ccavenue_url) ?>">
         <input type="hidden" name="encRequest" value="<?= htmlspecialchars($encrypted_data) ?>">
         <input type="hidden" name="access_code" value="<?= htmlspecialchars($access_code) ?>">
         <input type="hidden" name="merchant_id" value="<?= htmlspecialchars($merchant_id) ?>">

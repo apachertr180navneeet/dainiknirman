@@ -6,7 +6,7 @@ class Crypto
 {
     public static function encrypt($plainText, $key)
     {
-        $secretKey = self::hextobit($key);
+        $secretKey = self::getSecretKey($key);
         $initVector = pack("C*", 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f);
         $encryptedText = openssl_encrypt($plainText, 'aes-128-cbc', $secretKey, OPENSSL_RAW_DATA, $initVector);
         
@@ -19,7 +19,7 @@ class Crypto
 
     public static function decrypt($encryptedText, $key)
     {
-        $secretKey = self::hextobit($key);
+        $secretKey = self::getSecretKey($key);
         $initVector = pack("C*", 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f);
         $binData = self::hextobit($encryptedText);
         $decryptedText = openssl_decrypt($binData, 'aes-128-cbc', $secretKey, OPENSSL_RAW_DATA, $initVector);
@@ -30,5 +30,10 @@ class Crypto
     private static function hextobit($hex)
     {
         return pack('H*', $hex);
+    }
+
+    private static function getSecretKey($key)
+    {
+        return self::hextobit(md5($key));
     }
 }
