@@ -6,8 +6,8 @@ require_once __DIR__ . '/../db_config.php';
 use CCAvenue\Crypto;
 
 $merchant_id = '4442439';
-$access_code = 'AVHS92NE07AJ41SHJA';
-$working_key = 'E2059F4553269CE76A03F561109D20E8';
+$access_code = 'AVKL92NE20AO29LKOA';
+$working_key = '5A0CF9572A5DDBDAC144DC29B3995593';
 
 // Basic Validation
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -34,8 +34,29 @@ $cancel_url = $_POST['cancel_url'] ?? '';
 $user_id = $_POST['user_id'] ?? '';
 $prod_id = $_POST['prod_id'] ?? '';
 
-// Build merchant data string for CCAvenue
-$merchant_data = "merchant_id=$merchant_id&order_id=$order_id&amount=$amount&currency=INR&redirect_url=$redirect_url&cancel_url=$cancel_url&billing_name=$name&billing_address=$address&billing_city=$city&billing_state=$state&billing_zip=$zip&billing_country=$country&billing_tel=$phone&billing_email=$email";
+// Build merchant data array
+$data = [
+    'merchant_id' => $merchant_id,
+    'order_id' => $order_id,
+    'amount' => $amount,
+    'currency' => 'INR',
+    'redirect_url' => $redirect_url,
+    'cancel_url' => $cancel_url,
+    'billing_name' => $name,
+    'billing_address' => $address,
+    'billing_city' => $city,
+    'billing_state' => $state,
+    'billing_zip' => $zip,
+    'billing_country' => $country,
+    'billing_tel' => $phone,
+    'billing_email' => $email,
+];
+
+$merchant_data = '';
+foreach ($data as $key => $value) {
+    $merchant_data .= $key . '=' . $value . '&';
+}
+$merchant_data = rtrim($merchant_data, '&');
 
 // Encrypt the data
 $encrypted_data = Crypto::encrypt($merchant_data, $working_key);
@@ -82,6 +103,7 @@ if ($conn && $order_id && $user_id && $prod_id) {
     <form method="POST" action="https://test.ccavenue.com/transaction/transaction.do?command=initiateTransaction">
         <input type="hidden" name="encRequest" value="<?= htmlspecialchars($encrypted_data) ?>">
         <input type="hidden" name="access_code" value="<?= htmlspecialchars($access_code) ?>">
+        <input type="hidden" name="merchant_id" value="<?= htmlspecialchars($merchant_id) ?>">
     </form>
 </body>
 </html>

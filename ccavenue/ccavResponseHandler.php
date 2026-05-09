@@ -5,8 +5,8 @@ require_once __DIR__ . '/../db_config.php';
 
 use CCAvenue\Crypto;
 
-$working_key = 'E2059F4553269CE76A03F561109D20E8';
-$access_code = 'AVHS92NE07AJ41SHJA';
+$working_key = '5A0CF9572A5DDBDAC144DC29B3995593';
+$access_code = 'AVKL92NE20AO29LKOA';
 
 $encResponse = $_POST['encResp'] ?? '';
 $decResponse = Crypto::decrypt($encResponse, $working_key);
@@ -39,9 +39,9 @@ if ($conn && $order_id) {
 if ($order_status === 'Success') {
     header('Location: ../thankyou.html?order_id=' . urlencode($order_id) . '&status=success');
 } elseif ($order_status === 'Aborted') {
-    header('Location: ../index.html?error=payment_aborted&status=' . urlencode($order_status));
+    header('Location: ../checkout?error=payment_aborted&status=' . urlencode($order_status));
 } else {
     // Pass the failure message and status to help debugging
-    header('Location: ../index.html?error=payment_failed&status=' . urlencode($order_status) . '&msg=' . urlencode($failure_message));
+    header('Location: ../checkout?error=payment_failed&status=' . urlencode($order_status) . '&msg=' . urlencode($failure_message));
 }
 exit;
