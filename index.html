@@ -529,6 +529,49 @@
       }
     </script>
 
+    <div id="toast" class="toast"></div>
+
+    <style>
+      .toast {
+        visibility: hidden;
+        min-width: 320px;
+        background: #dc2626;
+        color: #fff;
+        text-align: center;
+        border-radius: 8px;
+        padding: 16px 24px;
+        position: fixed;
+        top: 90px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        opacity: 0;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+      .toast.show {
+        visibility: visible;
+        opacity: 1;
+      }
+    </style>
+
+    <script>
+      (function() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('error') === 'user_not_found') {
+          const toast = document.getElementById('toast');
+          toast.textContent = 'User detail not found. Please select book again from application after login.';
+          toast.classList.add('show');
+          setTimeout(function() {
+            toast.classList.remove('show');
+            // Clean URL
+            history.replaceState(null, '', window.location.pathname);
+          }, 5000);
+        }
+      })();
+    </script>
+
 </body>
 
 </html>
