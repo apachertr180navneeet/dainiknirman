@@ -34,19 +34,35 @@ $cancel_url = $_POST['cancel_url'] ?? '';
 $user_id = $_POST['user_id'] ?? '';
 $prod_id = $_POST['prod_id'] ?? '';
 $payment_option = $_POST['payment_option'] ?? '';
+$type = $_POST['type'] ?? 'book';
 
-$bookStmt = $conn->prepare("SELECT book_name, author_name, price FROM books WHERE id = ?");
-$bookStmt->bind_param("i", $prod_id);
-$bookStmt->execute();
-$bookResult = $bookStmt->get_result();
-$bookData = $bookResult->fetch_assoc();
-$bookStmt->close();
+if ($type === 'subscription') {
+    $subStmt = $conn->prepare("SELECT id, name, amount, validity, type FROM subscriptions WHERE id = ? AND status = 1");
+    $subStmt->bind_param("i", $prod_id);
+    $subStmt->execute();
+    $subResult = $subStmt->get_result();
+    $subData = $subResult->fetch_assoc();
+    $subStmt->close();
 
-if (!$bookData) {
-    die("Error: Product not found.");
+    if (!$subData) {
+        die("Error: Subscription plan not found.");
+    }
+
+    $amount = number_format((float) $subData['amount'], 2, '.', '');
+} else {
+    $bookStmt = $conn->prepare("SELECT book_name, author_name, price FROM books WHERE id = ?");
+    $bookStmt->bind_param("i", $prod_id);
+    $bookStmt->execute();
+    $bookResult = $bookStmt->get_result();
+    $bookData = $bookResult->fetch_assoc();
+    $bookStmt->close();
+
+    if (!$bookData) {
+        die("Error: Product not found.");
+    }
+
+    $amount = number_format((float) $bookData['price'], 2, '.', '');
 }
-
-$amount = number_format((float) $bookData['price'], 2, '.', '');
 
 if ((float) $amount <= 0) {
     die("Error: Invalid product amount.");
@@ -86,28 +102,38 @@ $encrypted_data = Crypto::encrypt($merchant_data, $working_key);
 // Record the order in the database (PENDING status)
 if ($conn && $order_id && $user_id && $prod_id) {
     try {
-        $itemDetails = json_encode([
-            'book_name' => $bookData['book_name'] ?? 'Unknown Book',
-            'author_name' => $bookData['author_name'] ?? 'Unknown Author',
-            'price' => $amount
-        ]);
+        if ($type === 'subscription') {
+            $subDetails = json_encode([
+                'subscription_name' => $subData['name'] ?? 'Unknown Plan',
+                'type' => $subData['type'] ?? '',
+                'price' => $amount
+            ]);
 
-        // Insert into orders table
-        $orderStmt = $conn->prepare("INSERT INTO orders (user_id, order_number, amount, payment_mode, payment_gateway, transaction_status, created_at, updated_at, total_items) VALUES (?, ?, ?, 'ONLINE', 'CCAVENUE', 'PENDING', NOW(), NOW(), 1)");
-        $orderStmt->bind_param("isd", $user_id, $order_id, $amount);
-        $orderStmt->execute();
-        $dbOrderId = $conn->insert_id;
-        $orderStmt->close();
+            $insertStmt = $conn->prepare("INSERT INTO plan_users (user_id, subscription_id, subscription_amount, subscription_details, order_number, payment_gateway, transaction_status, payment_mode, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'CCAVENUE', 'PENDING', 'ONLINE', NOW(), NOW())");
+            $insertStmt->bind_param("iidss", $user_id, $prod_id, $amount, $subDetails, $order_id);
+            $insertStmt->execute();
+            $insertStmt->close();
+        } else {
+            $itemDetails = json_encode([
+                'book_name' => $bookData['book_name'] ?? 'Unknown Book',
+                'author_name' => $bookData['author_name'] ?? 'Unknown Author',
+                'price' => $amount
+            ]);
 
-        // Insert into order_details table
-        if ($dbOrderId) {
-            $detailStmt = $conn->prepare("INSERT INTO order_details (order_id, type, type_id, item_details, amount, created_at, updated_at) VALUES (?, 'BOOK', ?, ?, ?, NOW(), NOW())");
-            $detailStmt->bind_param("iisd", $dbOrderId, $prod_id, $itemDetails, $amount);
-            $detailStmt->execute();
-            $detailStmt->close();
+            $orderStmt = $conn->prepare("INSERT INTO orders (user_id, order_number, amount, payment_mode, payment_gateway, transaction_status, created_at, updated_at, total_items) VALUES (?, ?, ?, 'ONLINE', 'CCAVENUE', 'PENDING', NOW(), NOW(), 1)");
+            $orderStmt->bind_param("isd", $user_id, $order_id, $amount);
+            $orderStmt->execute();
+            $dbOrderId = $conn->insert_id;
+            $orderStmt->close();
+
+            if ($dbOrderId) {
+                $detailStmt = $conn->prepare("INSERT INTO order_details (order_id, type, type_id, item_details, amount, created_at, updated_at) VALUES (?, 'BOOK', ?, ?, ?, NOW(), NOW())");
+                $detailStmt->bind_param("iisd", $dbOrderId, $prod_id, $itemDetails, $amount);
+                $detailStmt->execute();
+                $detailStmt->close();
+            }
         }
     } catch (Exception $e) {
-        // Log error but don't stop the payment process
         error_log("Order creation failed: " . $e->getMessage());
     }
 }

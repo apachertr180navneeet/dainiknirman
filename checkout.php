@@ -13,6 +13,11 @@ if (!$userId) {
     exit;
 }
 
+if (!$prodId) {
+    header('Location: subscription.php?user_id=' . urlencode($userId));
+    exit;
+}
+
 $stmt = $conn->prepare("SELECT name, email, mobile, address FROM users WHERE id = ?");
 $stmt->bind_param("i", $userId);
 $stmt->execute();

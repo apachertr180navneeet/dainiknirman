@@ -31,9 +31,11 @@ $amount = $data['amount'] ?? '';
 $failure_message = $data['failure_message'] ?? '';
 $checkoutUrl = '../index.html?error=payment_failed';
 $amountMatches = false;
+$isSubscription = false;
 
 // Update order status in database
 if ($conn && $order_id) {
+    // Try orders table first (books)
     $orderStmt = $conn->prepare("
         SELECT o.id, o.user_id, o.amount, od.type_id AS prod_id
         FROM orders o
@@ -49,6 +51,19 @@ if ($conn && $order_id) {
 
     if ($orderData) {
         $checkoutUrl = '../checkout?user_id=' . urlencode($orderData['user_id']) . '&prod_id=' . urlencode($orderData['prod_id']);
+    } else {
+        // Try plan_users table (subscriptions)
+        $subStmt = $conn->prepare("SELECT id, user_id, subscription_amount AS amount, subscription_id AS prod_id FROM plan_users WHERE order_number = ? LIMIT 1");
+        $subStmt->bind_param("s", $order_id);
+        $subStmt->execute();
+        $subResult = $subStmt->get_result();
+        $orderData = $subResult->fetch_assoc();
+        $subStmt->close();
+
+        if ($orderData) {
+            $isSubscription = true;
+            $checkoutUrl = '../subscription?user_id=' . urlencode($orderData['user_id']);
+        }
     }
 
     $dbStatus = 'FAILED';
@@ -66,10 +81,17 @@ if ($conn && $order_id) {
 
     $paymentDetails = json_encode($data);
 
-    $updateStmt = $conn->prepare("UPDATE orders SET transaction_status = ?, payment_details = ?, updated_at = NOW() WHERE order_number = ?");
-    $updateStmt->bind_param("sss", $dbStatus, $paymentDetails, $order_id);
-    $updateStmt->execute();
-    $updateStmt->close();
+    if ($isSubscription) {
+        $updateStmt = $conn->prepare("UPDATE plan_users SET transaction_status = ?, payment_details = ?, updated_at = NOW() WHERE order_number = ?");
+        $updateStmt->bind_param("sss", $dbStatus, $paymentDetails, $order_id);
+        $updateStmt->execute();
+        $updateStmt->close();
+    } else {
+        $updateStmt = $conn->prepare("UPDATE orders SET transaction_status = ?, payment_details = ?, updated_at = NOW() WHERE order_number = ?");
+        $updateStmt->bind_param("sss", $dbStatus, $paymentDetails, $order_id);
+        $updateStmt->execute();
+        $updateStmt->close();
+    }
 }
 
 if ($order_status === 'Success' && $amountMatches) {
@@ -77,7 +99,6 @@ if ($order_status === 'Success' && $amountMatches) {
 } elseif ($order_status === 'Aborted') {
     header('Location: ' . $checkoutUrl . '&error=payment_aborted&status=' . urlencode($order_status));
 } else {
-    // Pass the failure message and status to help debugging
     header('Location: ' . $checkoutUrl . '&error=payment_failed&status=' . urlencode($order_status) . '&msg=' . urlencode($failure_message));
 }
 exit;
